@@ -17,7 +17,6 @@ class Player:
         self.level = 0
         self.isAlive = True
         self.name = name
-        self.money = 25
         self.damage_taken = 0
         if CLASS == 'vagabond':#Vagabond class: Prioritizes defense above all
             self.weapon = 'halbred'
@@ -25,7 +24,7 @@ class Player:
             self.AC = 16
             self.health = 15
             self.atk_damage = 4
-            self.inventory = {self.weapon: self.atk_damage, self.armor: self.AC, 'Flasks': self.flask_count} #Keep 'Flasks' and increase the value +10 each new flask 
+            self.inventory = {self.weapon: self.atk_damage, self.armor: self.AC, 'Flasks': self.flask_count}
             self.max_health = self.health
             self.vigor, self.strength, self.dexterity = 0, 0, 0
             self.crit_chance = 20
@@ -66,6 +65,7 @@ class Enemy:
         self.crit_chance = 20
         self.flask_chance = flask_chance
         self.gold = gold
+        self.max_health = health
 
 enemies = [Enemy(5, 10, 2, 'goblin', 20, 2), Enemy(7, 12, 5, 'skeleton', 20, 5), Enemy(10, 13, 7, 'troll', 15, 10), Enemy(10, 20, 5, 'minotaur', 10, 15), Enemy(15, 15, 10, 'unknown soldier', 5, 20)]
 
@@ -85,10 +85,8 @@ def attack(player, enemy, isPlayersTurn):
         if player_attack == player.crit_chance:
             print('Critical hit!')
             enemy.health -= player.atk_damage + 5
-            enemy.damage_taken += player.atk_damage + 5
         else:
             enemy.health -= player.atk_damage
-            enemy.damage_taken += player.atk_damage
     else:
         enemy_attack = random.randint(1, enemy.crit_chance)
         if enemy_attack == enemy.crit_chance:
@@ -106,8 +104,8 @@ def roll(min, max, bonus):
 def lvlup(player):
     picked = False
     while picked == False:
-        choice = input('pick what to level: \n  1. vigor\n  2. strength\n  3. dexterity\n**To cancel enter stop\n')
-        if choice == 'cancel':
+        choice = input('pick what to level: \n  1. vigor\n  2. strength\n  3. dexterity\n**To cancel enter stop**\n')
+        if choice == 'stop':
             break
         if choice == '1':
             if player.vigor == player.max_vigor:
@@ -115,7 +113,6 @@ def lvlup(player):
             else:
                 player.max_health += 10
                 player.vigor += 1
-                player.experience -= player.experience_needed
                 picked = True
         elif choice == '2':
             if player.strength == player.max_strength:
@@ -123,7 +120,6 @@ def lvlup(player):
             else:
                 player.atk_damage += 5
                 player.strength += 1
-                player.experience -= player.experience_needed
                 picked = True
         else:
             if player.dexterity == player.max_dexterity:
@@ -132,12 +128,11 @@ def lvlup(player):
                 player.atk_damage += 2
                 player.crit_chance = player.crit_chance - 2
                 player.dexterity += 1
-                player.experience -= player.experience_needed
                 picked = True
         
         if picked == True:
-            player.experience_needed = int(player.experience_needed * 1.5)
-            print(player.experience_needed)
+            player.experience -= player.experience_needed
+            player.experience_needed = player.experience_needed * 2
             player.level += 1
 
 def heal(player):
@@ -160,20 +155,21 @@ def battle(player):
         if player.turn:
             choice = input('What is your move?\n\n1. attack!\n2. heal\n3. run for your life\n')
             if choice == '1':
-                os.system('cls')
+                os.system('clear')
                 print(f'You attack the {enemy.name}!\n')
                 attack(player, enemy, True)
                 if enemy.health <= 0:
+                    enemy.health = 0
                     player_win = True
                     enemy.isAlive = False
                 print(f'{enemy.name} health: {enemy.health}\n{player.name} health: {player.health}\n')
                 player.turn = False
             elif choice == '2':
-                os.system('cls')
+                os.system('clear')
                 if heal(player):
                     player.turn = False
             else:
-                os.system('cls')
+                os.system('clear')
                 if random.randint(1,10) >= 5:
                     print(f'You live to see another day thanks to your legs')
                     break
@@ -181,14 +177,16 @@ def battle(player):
                     print(f'The {enemy.name} attacks you!\n')
                     attack(player, enemy, False)
                     if player.health <= 0:
+                        player.health = 0
                         player.isAlive = False
                     print(f'{player.name} health: {player.health}\n{enemy.name} health: {enemy.health}\n')
                     player.turn = True
         else:
-            os.system('cls')
+            os.system('clear')
             print(f'The {enemy.name} attacks you!\n')
             attack(player, enemy, False)
             if player.health <= 0:
+                player.health = 0
                 player.isAlive = False
             print(f'{player.name} health: {player.health}\n{enemy.name} health: {enemy.health}\n')
             player.turn = True
@@ -197,8 +195,7 @@ def battle(player):
         print('You slayed the monster!')
         player.experience += 20
         player.enemies_killed += 1
-    enemy.health += enemy.damage_taken
-    enemy.damage_taken = 0
+    enemy.health = enemy.max_health
     enemy.isAlive = True
     player.turn = True
 
@@ -210,22 +207,22 @@ while (player.isAlive):
     print('\nWhat would you like to do?')
     ans = input('\n   1. Rest\n   2. Fight!\n   3. Show status\n   4. Shop\n   5. Manage inventory\n   6. Level up\n')
     if ans == '1':
-        os.system('cls')
+        os.system('clear')
         print('You sleep as an escapism from your misery')
         player.health += player.damage_taken
         player.damage_taken = 0
     if ans == '2':
-        os.system('cls')
+        os.system('clear')
         battle(player)
         if player.experience >= player.experience_needed:
             print('Level up available!')
     if ans == '3':
-        os.system('cls')
+        os.system('clear')
         print(f'Vigor: {player.vigor} | Strength: {player.strength} | Dexterity: {player.dexterity}')
-        print(f'Health: {player.health} | Enemies slain: {player.enemies_killed} | Flasks: {player.flask_count} | Experience: {player.experience}')
+        print(f'Health: {player.health} | Enemies slain: {player.enemies_killed} | Flasks: {player.flask_count}\nExperience: {player.experience} | Experience needed: {player.experience_needed}')
     if ans == '6':
-        os.system('cls')
-        if player.experience >= player.experience_needed:
+        os.system('clear')
+        if player.experience <= player.experience_needed:
             print('No level available!')
         else:
             lvlup(player)
