@@ -1,15 +1,33 @@
 import random
 import os
 
+class Item:
+    def __init__(self, name, value):
+        self.name = name
+        self.value = value
+        if name == 'halbred':
+            self.atk_damage = 4
+        elif name == 'battle axe':
+            self.atk_damage = 6
+        else:
+            self.atk_damage = 10
+        if name == 'armor plate':
+            self.AC = 16
+        elif name == 'leather armor':
+            self.AC = 12
+        else:
+            self.AC = 14
+        if name == 'flask':
+            self.flask_count = 1
+
 class Player:
+
     #   inventory standard: 0: weapon, 1: armor, 2: Flask
-    #   armor class, health, atk_damage, money
-    #   vigor, strength, dexterity
+
     def __init__(self, CLASS, name):
         self.max_vigor = 4
         self.max_strength = 4
         self.max_dexterity = 4
-        self.flask_count = 1
         self.enemies_killed = 0
         self.turn = True
         self.experience = 0
@@ -18,41 +36,27 @@ class Player:
         self.isAlive = True
         self.name = name
         self.damage_taken = 0
-        if CLASS == 'vagabond':#Vagabond class: Prioritizes defense above all
-            self.weapon = 'halbred'
-            self.armor = 'plate armor'
-            self.AC = 16
+        if CLASS == 'vagabond':
             self.health = 15
-            self.atk_damage = 4
-            self.inventory = {self.weapon: self.atk_damage, self.armor: self.AC, 'Flasks': self.flask_count}
+            self.inventory = [Item('halbred', 0), Item('armor plate', 20), 'flask']
             self.max_health = self.health
             self.vigor, self.strength, self.dexterity = 0, 0, 0
             self.crit_chance = 20
 
-        elif CLASS == 'warrior':#Warrior class: Yields higher damager for less defense
-            self.weapon = 'battle axe'
-            self.armor = 'chain mail'
-            self.AC = 14
+        elif CLASS == 'warrior':
             self.health = 14
-            self.atk_damage = 6
-            self.equipment = {self.weapon: self.atk_damage, self.armor: self.AC}
-            self.inventory = {'flask': 10}
+            self.inventory = [Item('battle axe', 10), Item('chain male', 20), 'flask']
             self.max_health = self.health
             self.vigor, self.strength, self.dexterity = 0, 0, 0
             self.crit_chance = 20
 
-        else:#Rogue class: Prioritizes offense above all
-            self.weapon = 'schimitar'
-            self.armor = 'leather armor'
-            self.AC = 12
+        else:
             self.health = 12
-            self.atk_damage = 10
-            self.equipment = {self.weapon: self.atk_damage, self.armor: self.AC}
-            self.inventory = {'flask': 10}
+            self.inventory = [Item('schimitar', 10), Item('leather armor', 15), 'flask']
             self.max_health = self.health
             self.vigor, self.strength, self.dexterity = 0, 0, 0
             self.crit_chance = 15
-    
+
 class Enemy:
 
     def __init__(self, AC, health, atk_damage, name, flask_chance, gold):
@@ -84,9 +88,9 @@ def attack(player, enemy, isPlayersTurn):
         player_attack = random.randint(1, player.crit_chance)
         if player_attack == player.crit_chance:
             print('Critical hit!')
-            enemy.health -= player.atk_damage + 5
+            enemy.health -= player.inventory[0].atk_damage + 5
         else:
-            enemy.health -= player.atk_damage
+            enemy.health -= player.inventory[0].atk_damage
     else:
         enemy_attack = random.randint(1, enemy.crit_chance)
         if enemy_attack == enemy.crit_chance:
@@ -118,14 +122,14 @@ def lvlup(player):
             if player.strength == player.max_strength:
                 print('Already max level!')
             else:
-                player.atk_damage += 5
+                player.inventory[0].atk_damage += 5
                 player.strength += 1
                 picked = True
         else:
             if player.dexterity == player.max_dexterity:
                 print('Already max level!')
             else:
-                player.atk_damage += 2
+                player.inventory[0].atk_damage += 2
                 player.crit_chance = player.crit_chance - 2
                 player.dexterity += 1
                 picked = True
@@ -136,15 +140,15 @@ def lvlup(player):
             player.level += 1
 
 def heal(player):
-    if player.flask_count > 0:
+    if player.inventory[2].flask_count > 0:
         print('No flask in inventory!')
         return False
     else:
-        if player.health + player.flask_count > player.max_health:
+        if player.health + player.inventory[2].flask_count > player.max_health:
             player.health = player.max_health
         else:
             player.health += 10
-        player.flask_count -= 1
+        player.inventory[2].flask_count -= 1
 
 
 def battle(player):
@@ -219,7 +223,7 @@ while (player.isAlive):
     if ans == '3':
         os.system('clear')
         print(f'Vigor: {player.vigor} | Strength: {player.strength} | Dexterity: {player.dexterity}')
-        print(f'Health: {player.health} | Enemies slain: {player.enemies_killed} | Flasks: {player.flask_count}\nExperience: {player.experience} | Experience needed: {player.experience_needed}')
+        print(f'Health: {player.health} | Enemies slain: {player.enemies_killed} | Flasks: {player.inventory[2].flask_count}\nExperience: {player.experience} | Experience needed: {player.experience_needed}')
     if ans == '6':
         os.system('clear')
         if player.experience <= player.experience_needed:
