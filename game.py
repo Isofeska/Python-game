@@ -38,21 +38,21 @@ class Player:
         self.damage_taken = 0
         if CLASS == 'vagabond':
             self.health = 15
-            self.inventory = [Item('halbred', 0), Item('armor plate', 20), 'flask']
+            self.inventory = [Item('halbred', 0), Item('armor plate', 20), Item('flask', 5)]
             self.max_health = self.health
             self.vigor, self.strength, self.dexterity = 0, 0, 0
             self.crit_chance = 20
 
         elif CLASS == 'warrior':
             self.health = 14
-            self.inventory = [Item('battle axe', 10), Item('chain male', 20), 'flask']
+            self.inventory = [Item('battle axe', 10), Item('chain male', 20), Item('flask', 5)]
             self.max_health = self.health
             self.vigor, self.strength, self.dexterity = 0, 0, 0
             self.crit_chance = 20
 
         else:
             self.health = 12
-            self.inventory = [Item('schimitar', 10), Item('leather armor', 15), 'flask']
+            self.inventory = [Item('schimitar', 10), Item('leather armor', 15), Item('flask', 5)]
             self.max_health = self.health
             self.vigor, self.strength, self.dexterity = 0, 0, 0
             self.crit_chance = 15
@@ -140,7 +140,7 @@ def lvlup(player):
             player.level += 1
 
 def heal(player):
-    if player.inventory[2].flask_count > 0:
+    if player.inventory[2].flask_count < 0:
         print('No flask in inventory!')
         return False
     else:
@@ -159,7 +159,7 @@ def battle(player):
         if player.turn:
             choice = input('What is your move?\n\n1. attack!\n2. heal\n3. run for your life\n')
             if choice == '1':
-                os.system('clear')
+                os.system('cls')
                 print(f'You attack the {enemy.name}!\n')
                 attack(player, enemy, True)
                 if enemy.health <= 0:
@@ -169,11 +169,11 @@ def battle(player):
                 print(f'{enemy.name} health: {enemy.health}\n{player.name} health: {player.health}\n')
                 player.turn = False
             elif choice == '2':
-                os.system('clear')
+                os.system('cls')
                 if heal(player):
                     player.turn = False
             else:
-                os.system('clear')
+                os.system('cls')
                 if random.randint(1,10) >= 5:
                     print(f'You live to see another day thanks to your legs')
                     break
@@ -186,7 +186,7 @@ def battle(player):
                     print(f'{player.name} health: {player.health}\n{enemy.name} health: {enemy.health}\n')
                     player.turn = True
         else:
-            os.system('clear')
+            os.system('cls')
             print(f'The {enemy.name} attacks you!\n')
             attack(player, enemy, False)
             if player.health <= 0:
@@ -211,21 +211,21 @@ while (player.isAlive):
     print('\nWhat would you like to do?')
     ans = input('\n   1. Rest\n   2. Fight!\n   3. Show status\n   4. Shop\n   5. Manage inventory\n   6. Level up\n')
     if ans == '1':
-        os.system('clear')
+        os.system('cls')
         print('You sleep as an escapism from your misery')
         player.health += player.damage_taken
         player.damage_taken = 0
     if ans == '2':
-        os.system('clear')
+        os.system('cls')
         battle(player)
         if player.experience >= player.experience_needed:
             print('Level up available!')
     if ans == '3':
-        os.system('clear')
+        os.system('cls')
         print(f'Vigor: {player.vigor} | Strength: {player.strength} | Dexterity: {player.dexterity}')
         print(f'Health: {player.health} | Enemies slain: {player.enemies_killed} | Flasks: {player.inventory[2].flask_count}\nExperience: {player.experience} | Experience needed: {player.experience_needed}')
     if ans == '6':
-        os.system('clear')
+        os.system('cls')
         if player.experience <= player.experience_needed:
             print('No level available!')
         else:
