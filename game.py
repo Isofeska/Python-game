@@ -71,6 +71,7 @@ class Player:
         self.isAlive = True
         self.name = name
         self.damage_taken = 0
+        self.flask_count = 1
         if CLASS == 'vagabond':
             self.health = 15
             self.inventory = [Item('halbred'), Item('armor plate'), Item('flask')]
@@ -80,7 +81,7 @@ class Player:
 
         elif CLASS == 'warrior':
             self.health = 14
-            self.inventory = [Item('battle axe'), Item('chain male'), Item('flask')]
+            self.inventory = [Item('battle axe'), Item('chain mail'), Item('flask')]
             self.max_health = self.health
             self.vigor, self.strength, self.dexterity = 0, 0, 0
             self.crit_chance = 20
@@ -106,7 +107,18 @@ class Enemy:
         self.gold = gold
         self.max_health = health
 
+class Boss:
+
+    def __init__(self, AC, health, atk_damage, name, gold):
+        self.isAlive = True
+        self.AC = AC
+        self.health = health
+        self.atk_damage = atk_damage
+        self.name = name
+        self.gold = gold
+
 enemies = [Enemy(5, 10, 2, 'goblin', 20, 2), Enemy(7, 12, 5, 'skeleton', 20, 5), Enemy(10, 13, 7, 'troll', 15, 10), Enemy(10, 20, 5, 'minotaur', 10, 15), Enemy(15, 15, 10, 'unknown soldier', 5, 20)]
+bosses = [Boss(10, 20, 5, 'Goblin King', 20), Boss(14, 24, 7, 'Skeleton King', 25), Boss(10, 26, 10, 'Troll King', 30), Boss(15, 23, 10, 'Unknown King', 50)]
 
 def pick_enemy(level, enemy_list):
     if level == 0:
@@ -131,7 +143,7 @@ def attack(player, enemy, isPlayersTurn):
             else:
                 enemy.health -= player.inventory[0].atk_damage
         else:
-            print('Miss!')
+            print('Miss!\n')
     else:
         if roll(1, 20, 0) >= player.inventory[1].AC:
             enemy_attack = random.randint(1, enemy.crit_chance)
@@ -143,94 +155,99 @@ def attack(player, enemy, isPlayersTurn):
                 player.health -= enemy.atk_damage
                 player.damage_taken += enemy.atk_damage
         else:
-            print('Miss!')
+            print('Miss!\n')
 
 def roll(min, max, bonus):
     min += bonus
     return random.randint(min, max)
 
 def shop(player):
-    pick = input('Welcome to the shop!\nTake a look at the wares:\n   1. flask\n   2. nagikiba\n   3. greatsword\n   4. misericorde\n   5. padded armor\n   6. scale mail\n   7. heavy armor plate\n')
-    match pick:
-        case '1':
-            if player.gold < 15:
-                print('Not enough money!')
-            else:
-                print('Purchase successful!')
-                player.inventory[2].flask_count += 1
-                player.gold -= 15
-        case '2':
-            if player.gold < 40:
-                print('Not enough money!')
-            else:
-                print('Purchase successful!')
-                player.gold -= 40
-                equip = input('Would you like to equip this item? y or n: ')
-                if equip == 'y':
-                    player.inventory.append(player.inventory[0])
-                    player.inventory[0] = Item('nagikiba')
+    print(f'Current gold: {player.gold}')
+    while True:
+        pick = input('Welcome to the shop!\nPick out what you like:\n   1. flask(15)\n   2. nagikiba(40)\n   3. greatsword(50)\n   4. misericorde(45)\n   5. padded armor(30)\n   6. scale mail(40)\n   7. heavy armor plate(50)\n   8. Leave\n')
+        match pick:
+            case '1':
+                if player.gold < 15:
+                    print('Not enough money!')
                 else:
-                    player.inventory.append(Item('nagikiba'))
-        case '3':
-            if player.gold < 50:
-                print('Not enough money!')
-            else:
-                print('Purchase successful!')
-                player.gold -= 50
-                equip = input('Would you like to equip this item? y or n: ')
-                if equip == 'y':
-                    player.inventory.append(player.inventory[0])
-                    player.inventory[0] = Item('greatsword')
+                    print('Purchase successful!')
+                    player.flask_count += 1
+                    player.gold -= 15
+            case '2':
+                if player.gold < 40:
+                    print('Not enough money!')
                 else:
-                    player.inventory.append(Item('greatsword'))
-        case '4':
-            if player.gold < 45:
-                print('Not enough money!')
-            else:
-                print('Purchase successful!')
-                player.gold -= 45
-                equip = input('Would you like to equip this item? y or n: ')
-                if equip == 'y':
-                    player.inventory.append(player.inventory[0])
-                    player.inventory[0] = Item('misericorde')
+                    print('Purchase successful!')
+                    player.gold -= 40
+                    equip = input('Would you like to equip this item? y or n: ')
+                    if equip == 'y':
+                        player.inventory.append(player.inventory[0])
+                        player.inventory[0] = Item('nagikiba')
+                    else:
+                        player.inventory.append(Item('nagikiba'))
+            case '3':
+                if player.gold < 50:
+                    print('Not enough money!')
                 else:
-                    player.inventory.append(Item('misericorde'))
-        case '5':
-            if player.gold < 30:
-                print('Not enough money!')
-            else:
-                print('Purchase successful!')
-                player.gold -= 30
-                equip = input('Would you like to equip this item? y or n: ')
-                if equip == 'y':
-                    player.inventory.append(player.inventory[1])
-                    player.inventory[1] = Item('padded armor')
+                    print('Purchase successful!')
+                    player.gold -= 50
+                    equip = input('Would you like to equip this item? y or n: ')
+                    if equip == 'y':
+                        player.inventory.append(player.inventory[0])
+                        player.inventory[0] = Item('greatsword')
+                    else:
+                        player.inventory.append(Item('greatsword'))
+            case '4':
+                if player.gold < 45:
+                    print('Not enough money!')
                 else:
-                    player.inventory.append(Item('padded armor'))
-        case '6':
-            if player.gold < 40:
-                print('Not enough money!')
-            else:
-                print('Purchase successful!')
-                player.gold -= 40
-                equip = input('Would you like to equip this item? y or n: ')
-                if equip == 'y':
-                    player.inventory.append(player.inventory[1])
-                    player.inventory[1] = Item('scale mail')
+                    print('Purchase successful!')
+                    player.gold -= 45
+                    equip = input('Would you like to equip this item? y or n: ')
+                    if equip == 'y':
+                        player.inventory.append(player.inventory[0])
+                        player.inventory[0] = Item('misericorde')
+                    else:
+                        player.inventory.append(Item('misericorde'))
+            case '5':
+                if player.gold < 30:
+                    print('Not enough money!')
                 else:
-                    player.inventory.append(Item('scale mail'))
-        case '7':
-            if player.gold < 50:
-                print('Not enough money!')
-            else:
-                print('Purchase successful!')
-                player.gold -= 50
-                equip = input('Would you like to equip this item? y or n: ')
-                if equip == 'y':
-                    player.inventory.append(player.inventory[1])
-                    player.inventory[1] = Item('heavy armor plate')
+                    print('Purchase successful!')
+                    player.gold -= 30
+                    equip = input('Would you like to equip this item? y or n: ')
+                    if equip == 'y':
+                        player.inventory.append(player.inventory[1])
+                        player.inventory[1] = Item('padded armor')
+                    else:
+                        player.inventory.append(Item('padded armor'))
+            case '6':
+                if player.gold < 40:
+                    print('Not enough money!')
                 else:
-                    player.inventory.append(Item('heavy armor plate'))
+                    print('Purchase successful!')
+                    player.gold -= 40
+                    equip = input('Would you like to equip this item? y or n: ')
+                    if equip == 'y':
+                        player.inventory.append(player.inventory[1])
+                        player.inventory[1] = Item('scale mail')
+                    else:
+                        player.inventory.append(Item('scale mail'))
+            case '7':
+                if player.gold < 50:
+                    print('Not enough money!')
+                else:
+                    print('Purchase successful!')
+                    player.gold -= 50
+                    equip = input('Would you like to equip this item? y or n: ')
+                    if equip == 'y':
+                        player.inventory.append(player.inventory[1])
+                        player.inventory[1] = Item('heavy armor plate')
+                    else:
+                        player.inventory.append(Item('heavy armor plate'))
+            case '8':
+                break
+
 def lvlup(player):
     picked = False
     while picked == False:
@@ -242,6 +259,7 @@ def lvlup(player):
                 print('Already max level!')
             else:
                 player.max_health += 10
+                player.health = player.max_health
                 player.vigor += 1
                 picked = True
         elif choice == '2':
@@ -266,16 +284,15 @@ def lvlup(player):
             player.level += 1
 
 def heal(player):
-    if player.inventory[2].flask_count < 0:
-        print('No flask in inventory!')
-        return False
-    else:
-        if player.health + player.inventory[2].flask_count > player.max_health:
+    if player.flask_count > 0:
+        if player.health + 10 > player.max_health:
             player.health = player.max_health
         else:
             player.health += 10
-        player.inventory[2].flask_count -= 1
-
+        player.flask_count -= 1
+    else:
+        return False
+    return True
 
 def battle(player):
     enemy = pick_enemy(player.level, enemies)
@@ -283,7 +300,8 @@ def battle(player):
     player_win = False
     while(enemy.isAlive and player.isAlive):
         if player.turn:
-            choice = input('What is your move?\n\n1. attack!\n2. heal\n3. run for your life\n')
+            choice = input('What is your move?\n\n1. attack!\n2. heal\n3. run for your life\n4. defend\n')
+            defend = False
             if choice == '1':
                 os.system('cls')
                 print(f'You attack the {enemy.name}!\n')
@@ -297,8 +315,13 @@ def battle(player):
             elif choice == '2':
                 os.system('cls')
                 if heal(player):
+                    print('You drink a flask')
+                    print(f'{enemy.name} health: {enemy.health}\n{player.name} health: {player.health}\n')
                     player.turn = False
-            else:
+                else:
+                    print('No flask in inventory!\n')
+                    print(f'{enemy.name} health: {enemy.health}\n{player.name} health: {player.health}\n')
+            elif choice == '3':
                 os.system('cls')
                 if random.randint(1,10) >= 5:
                     print(f'You live to see another day thanks to your legs')
@@ -309,8 +332,14 @@ def battle(player):
                     if player.health <= 0:
                         player.health = 0
                         player.isAlive = False
-                    print(f'{player.name} health: {player.health}\n{enemy.name} health: {enemy.health}\n')
+                    print(f'{enemy.name} health: {enemy.health}\n{player.name} health: {player.health}\n')
                     player.turn = True
+            else:
+                defend = True
+                os.system('cls')
+                print('You choose to defend yourself')
+                player.inventory[1].AC += 5
+                player.turn = False
             time.sleep(2)
         else:
             os.system('cls')
@@ -319,14 +348,19 @@ def battle(player):
             if player.health <= 0:
                 player.health = 0
                 player.isAlive = False
-            print(f'{player.name} health: {player.health}\n{enemy.name} health: {enemy.health}\n')
+            print(f'{enemy.name} health: {enemy.health}\n{player.name} health: {player.health}\n')
             player.turn = True
+            if defend:
+                player.inventory[1].AC -= 5
 
     if player_win:
         print('You slayed the monster!')
         player.gold += enemy.gold
         player.experience += 20
         player.enemies_killed += 1
+        result = roll(0, 20, 0)
+        if result >= enemy.flask_chance:
+            player.flask_count += 1
     enemy.health = enemy.max_health
     enemy.isAlive = True
     player.turn = True
@@ -350,15 +384,22 @@ while (player.isAlive):
             if player.experience >= player.experience_needed:
                 print('Level up available!')
         else:
+            os.system('cls')
             print('You cannot battle in town!')
     if ans == '3':
         os.system('cls')
         print(f'Vigor: {player.vigor} | Strength: {player.strength} | Dexterity: {player.dexterity}')
-        print(f'Health: {player.health} | Enemies slain: {player.enemies_killed} | Flasks: {player.inventory[2].flask_count}\nExperience: {player.experience} | Experience needed: {player.experience_needed}')
+        print(f'Health: {player.health} | Enemies slain: {player.enemies_killed} | Flasks: {player.flask_count}\nExperience: {player.experience} | Experience needed: {player.experience_needed}')
         print(f'Gold: {player.gold}')
     if ans == '4':
-        player.in_town = True
+        os.system('cls')
+        if player.in_town:
+            print('\nAlready in town!')
+        else:
+            print('You enter the village')
+            player.in_town = True
     if ans == '5':
+        os.system('cls')
         temp = input(f'What would you look to view?\n1. {player.inventory[0].name}\n2. {player.inventory[1].name}\n')
         if temp == '1':
             print(f'{player.inventory[0].description}')
@@ -372,15 +413,18 @@ while (player.isAlive):
             lvlup(player)
             print(f'\nVigor: {player.vigor} | Strength: {player.strength} | Dexterity: {player.dexterity}')
     if ans == '7':
+        os.system('cls')
         if player.in_town:
             shop(player)
         else:
             print('You must be town to shop!')
     if ans == 8:
+        os.system('cls')
         if player.in_town:
             print('You leave town')
+            player.in_town = False
         else:
-            choice = input('Are you sure? y or n: ')
+            choice = input('Are you sure you want to quit? y or n: ')
             if choice == 'y':
                 break
-print('You died...')
+print('Game over')
