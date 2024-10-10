@@ -26,10 +26,10 @@ class Item:
                 self.price = 45
                 self.atk_damage = 4
                 self.description = 'A sharp dagger that packs a powerful punch when you land a critical hit'
-            case 'nagikiba':
+            case 'nagakiba':
                 self.price = 40
                 self.atk_damage = 7
-                self.description = 'A nagikiba from a far away land, no ones knows how it ended up here'
+                self.description = 'A nagakiba from a far away land, no ones knows how it ended up here'
             case 'halbred':
                 self.atk_damage = 5
                 self.description = 'A battle-hardened halbred that will strike enemies from a distance'
@@ -53,6 +53,10 @@ class Item:
                 self.flask_count = 1
                 self.description = 'A potion of healing that you can use while in combat'
 
+weapon = [Item('halbred'), Item('battle axe'), Item('schimitar'), Item('nagakiba'), Item('misericorde'), Item('greatsword')]
+armor = [Item('armor plate'), Item('chail mail'), Item('leather armor'), Item('scale mail'), Item('padded armor'), Item('heavy armor plate')]
+flask = Item('flask')
+
 class Player:
 
     #   inventory standard: 0: weapon, 1: armor, 2: Flask
@@ -74,21 +78,21 @@ class Player:
         self.flask_count = 1
         if CLASS == 'vagabond':
             self.health = 15
-            self.inventory = [Item('halbred'), Item('armor plate'), Item('flask')]
+            self.inventory = [weapon[2], armor[2], flask]
             self.max_health = self.health
             self.vigor, self.strength, self.dexterity = 0, 0, 0
             self.crit_chance = 20
 
         elif CLASS == 'warrior':
             self.health = 14
-            self.inventory = [Item('battle axe'), Item('chain mail'), Item('flask')]
+            self.inventory = [weapon[0], armor[0], flask]
             self.max_health = self.health
             self.vigor, self.strength, self.dexterity = 0, 0, 0
             self.crit_chance = 20
 
         else:
             self.health = 12
-            self.inventory = [Item('schimitar'), Item('leather armor'), Item('flask')]
+            self.inventory = [weapon[1], armor[1], flask]
             self.max_health = self.health
             self.vigor, self.strength, self.dexterity = 0, 0, 0
             self.crit_chance = 15
@@ -164,7 +168,7 @@ def roll(min, max, bonus):
 def shop(player):
     print(f'Current gold: {player.gold}')
     while True:
-        pick = input('Welcome to the shop!\nPick out what you like:\n   1. flask(15)\n   2. nagikiba(40)\n   3. greatsword(50)\n   4. misericorde(45)\n   5. padded armor(30)\n   6. scale mail(40)\n   7. heavy armor plate(50)\n   8. Leave\n')
+        pick = input('Welcome to the shop!\nPick out what you like:\n   1. flask(15)\n   2. nagakiba(40)\n   3. greatsword(50)\n   4. misericorde(45)\n   5. padded armor(30)\n   6. scale mail(40)\n   7. heavy armor plate(50)\n   8. Leave\n')
         match pick:
             case '1':
                 if player.gold < 15:
@@ -182,9 +186,9 @@ def shop(player):
                     equip = input('Would you like to equip this item? y or n: ')
                     if equip == 'y':
                         player.inventory.append(player.inventory[0])
-                        player.inventory[0] = Item('nagikiba')
+                        player.inventory[0] = weapon[3]
                     else:
-                        player.inventory.append(Item('nagikiba'))
+                        player.inventory.append(weapon[3])
             case '3':
                 if player.gold < 50:
                     print('Not enough money!')
@@ -194,9 +198,9 @@ def shop(player):
                     equip = input('Would you like to equip this item? y or n: ')
                     if equip == 'y':
                         player.inventory.append(player.inventory[0])
-                        player.inventory[0] = Item('greatsword')
+                        player.inventory[0] = weapon[5]
                     else:
-                        player.inventory.append(Item('greatsword'))
+                        player.inventory.append(weapon[5])
             case '4':
                 if player.gold < 45:
                     print('Not enough money!')
@@ -206,9 +210,9 @@ def shop(player):
                     equip = input('Would you like to equip this item? y or n: ')
                     if equip == 'y':
                         player.inventory.append(player.inventory[0])
-                        player.inventory[0] = Item('misericorde')
+                        player.inventory[0] = weapon[4]
                     else:
-                        player.inventory.append(Item('misericorde'))
+                        player.inventory.append(weapon[4])
             case '5':
                 if player.gold < 30:
                     print('Not enough money!')
@@ -218,9 +222,9 @@ def shop(player):
                     equip = input('Would you like to equip this item? y or n: ')
                     if equip == 'y':
                         player.inventory.append(player.inventory[1])
-                        player.inventory[1] = Item('padded armor')
+                        player.inventory[1] = armor[4]
                     else:
-                        player.inventory.append(Item('padded armor'))
+                        player.inventory.append(armor[4])
             case '6':
                 if player.gold < 40:
                     print('Not enough money!')
@@ -230,9 +234,9 @@ def shop(player):
                     equip = input('Would you like to equip this item? y or n: ')
                     if equip == 'y':
                         player.inventory.append(player.inventory[1])
-                        player.inventory[1] = Item('scale mail')
+                        player.inventory[1] = armor[3]
                     else:
-                        player.inventory.append(Item('scale mail'))
+                        player.inventory.append(armor[3])
             case '7':
                 if player.gold < 50:
                     print('Not enough money!')
@@ -242,9 +246,9 @@ def shop(player):
                     equip = input('Would you like to equip this item? y or n: ')
                     if equip == 'y':
                         player.inventory.append(player.inventory[1])
-                        player.inventory[1] = Item('heavy armor plate')
+                        player.inventory[1] = armor[5]
                     else:
-                        player.inventory.append(Item('heavy armor plate'))
+                        player.inventory.append(armor[5])
             case '8':
                 break
 
@@ -372,59 +376,99 @@ player = Player(profession, name)
 while (player.isAlive):
     print('\nWhat would you like to do?')
     ans = input('\n   1. Rest\n   2. Fight!\n   3. Show status\n   4. Go to town\n   5. Manage inventory\n   6. Level up\n   7. Shop\n   8. Leave\n')
-    if ans == '1':
-        os.system('cls')
-        print('You sleep as an escapism from your misery')
-        player.health += player.damage_taken
-        player.damage_taken = 0
-    if ans == '2':
-        if player.in_town == False:
+    match ans:
+        case '1':
             os.system('cls')
-            battle(player)
-            if player.experience >= player.experience_needed:
-                print('Level up available!')
-        else:
+            print('You sleep as an escapism from your misery')
+            player.health += player.damage_taken
+            player.damage_taken = 0
+
+        case '2':
+            if player.in_town == False:
+                os.system('cls')
+                battle(player)
+                if player.experience >= player.experience_needed:
+                    print('Level up available!')
+            else:
+                os.system('cls')
+                print('You cannot battle in town!')
+
+        case '3':
             os.system('cls')
-            print('You cannot battle in town!')
-    if ans == '3':
-        os.system('cls')
-        print(f'Vigor: {player.vigor} | Strength: {player.strength} | Dexterity: {player.dexterity}')
-        print(f'Health: {player.health} | Enemies slain: {player.enemies_killed} | Flasks: {player.flask_count}\nExperience: {player.experience} | Experience needed: {player.experience_needed}')
-        print(f'Gold: {player.gold}')
-    if ans == '4':
-        os.system('cls')
-        if player.in_town:
-            print('\nAlready in town!')
-        else:
-            print('You enter the village')
-            player.in_town = True
-    if ans == '5':
-        os.system('cls')
-        temp = input(f'What would you look to view?\n1. {player.inventory[0].name}\n2. {player.inventory[1].name}\n')
-        if temp == '1':
-            print(f'{player.inventory[0].description}')
-        else:
-            print(f'{player.inventory[1].description}')
-    if ans == '6':
-        os.system('cls')
-        if player.experience <= player.experience_needed:
-            print('No level available!')
-        else:
-            lvlup(player)
-            print(f'\nVigor: {player.vigor} | Strength: {player.strength} | Dexterity: {player.dexterity}')
-    if ans == '7':
-        os.system('cls')
-        if player.in_town:
-            shop(player)
-        else:
-            print('You must be town to shop!')
-    if ans == 8:
-        os.system('cls')
-        if player.in_town:
-            print('You leave town')
-            player.in_town = False
-        else:
-            choice = input('Are you sure you want to quit? y or n: ')
-            if choice == 'y':
-                break
+            print(f'Vigor: {player.vigor} | Strength: {player.strength} | Dexterity: {player.dexterity}')
+            print(f'Health: {player.health} | Enemies slain: {player.enemies_killed} | Flasks: {player.flask_count}\nExperience: {player.experience} | Experience needed: {player.experience_needed}')
+            print(f'Gold: {player.gold}')
+
+        case '4':
+            os.system('cls')
+            if player.in_town:
+                print('\nAlready in town!')
+            else:
+                print('You enter the village')
+                player.in_town = True
+
+        case '5':
+            done = False
+            while done != True:
+                os.system('cls')
+                answer5 = input(f'What do you want to do?\n   1. Equip items\n   2. See item descriptions\n')
+                match answer5:
+                    case '1':
+                        if len(player.inventory) < 4:
+                            print('No available items to equip!')
+                        else:
+                            for i in range(4,len(player.inventory)):
+                                if player.inventory[i].name in weapon:
+                                    choice = input(f'Would you like to equip {player.inventory[i].name}? y or n: ')
+                                    if choice == 'y':
+                                        temp = player.inventory[0]
+                                        player.inventory[0] = player.inventory[i]
+                                        player.inventory[i] = temp
+                                        print('Successfully equipped!')
+                                        done = True
+
+                                if player.inventory[i].name in armor:
+                                    choice = input(f'Would you like to equip {player.inventory[i].name}? y or n: ')
+                                    if choice == 'y':
+                                        temp = player.inventory[1]
+                                        player.inventory[1] = player.inventory[i]
+                                        player.inventory[i] = temp
+                                        print('Successfully equipped!')
+                                        done = True
+                            print('No equippable items found')
+                            done = True
+                    case '2':
+                        choice = input(f'What would you like to view?\n   1. {player.inventory[0].name}\n   2. {player.inventory[1].name}\n   3. {player.inventory[2].name}')
+                        match choice:
+                            case '1':
+                                print(player.inventory[0].description)
+                            case '2':
+                                print(player.inventory[1].description)
+                            case '3':
+                                print(player.inventory[2].description)
+        case '6':
+            os.system('cls')
+            if player.experience <= player.experience_needed:
+                print('No level available!')
+            else:
+                lvlup(player)
+                print(f'\nVigor: {player.vigor} | Strength: {player.strength} | Dexterity: {player.dexterity}')
+        case '7':
+            os.system('cls')
+            if player.in_town:
+                shop(player)
+            else:
+                print('You must be town to shop!')
+        case '8':
+            os.system('cls')
+            if player.in_town:
+                print('You leave town')
+                player.in_town = False
+                os.sysetem('cls')
+            else:
+                os.system('cls')
+                choice = input('Are you sure you want to quit? y or n: ')
+                if choice == 'y':
+                    break
+                    
 print('Game over')
