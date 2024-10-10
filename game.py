@@ -124,6 +124,49 @@ class Boss:
 enemies = [Enemy(5, 10, 2, 'goblin', 20, 2), Enemy(7, 12, 5, 'skeleton', 20, 5), Enemy(10, 13, 7, 'troll', 15, 10), Enemy(10, 20, 5, 'minotaur', 10, 15), Enemy(15, 15, 10, 'unknown soldier', 5, 20)]
 bosses = [Boss(10, 20, 5, 'Goblin King', 20), Boss(14, 24, 7, 'Skeleton King', 25), Boss(10, 26, 10, 'Troll King', 30), Boss(15, 23, 10, 'Unknown King', 50)]
 
+def manage_inventory(player):
+    done = False
+    while done != True:
+        answer5 = input(f'What do you want to do?\n   1. Equip items\n   2. See item descriptions\n')
+        match answer5:
+            case '1':
+                if len(player.inventory) < 4:
+                    print('No available items to equip!')
+                else:
+                    for i in range(3,len(player.inventory)):
+                        if player.inventory[i] in weapon:
+                            choice = input(f'Would you like to equip {player.inventory[i].name}? y or n: ')
+                            if choice == 'y':
+                                temp = player.inventory[0]
+                                player.inventory[0] = player.inventory[i]
+                                player.inventory[i] = temp
+                                print('Successfully equipped!\n')
+                                done = True
+
+                        if player.inventory[i] in armor:
+                            choice = input(f'Would you like to equip {player.inventory[i].name}? y or n: ')
+                            if choice == 'y':
+                                temp = player.inventory[1]
+                                player.inventory[1] = player.inventory[i]
+                                player.inventory[i] = temp
+                                print('Successfully equipped!\n')
+                                done = True
+                    print('No other equippable items found')
+                    done = True
+            case '2':
+                choice = input(f'What would you like to view?\n   1. {player.inventory[0].name}\n   2. {player.inventory[1].name}\n   3. {player.inventory[2].name}\n')
+                match choice:
+                    case '1':
+                        print(player.inventory[0].description)
+                        done = True
+                    case '2':
+                        print(player.inventory[1].description)
+                        done = True
+                    case '3':
+                        print(player.inventory[2].description)
+                        done = True
+
+
 def pick_enemy(level, enemy_list):
     if level == 0:
         return enemy_list[random.randint(0,1)]
@@ -306,44 +349,49 @@ def battle(player):
         if player.turn:
             choice = input('What is your move?\n\n1. attack!\n2. heal\n3. run for your life\n4. defend\n')
             defend = False
-            if choice == '1':
-                os.system('cls')
-                print(f'You attack the {enemy.name}!\n')
-                attack(player, enemy, True)
-                if enemy.health <= 0:
-                    enemy.health = 0
-                    player_win = True
-                    enemy.isAlive = False
-                print(f'{enemy.name} health: {enemy.health}\n{player.name} health: {player.health}\n')
-                player.turn = False
-            elif choice == '2':
-                os.system('cls')
-                if heal(player):
-                    print('You drink a flask')
+            match choice:
+                case '1':
+                    os.system('cls')
+                    print(f'You attack the {enemy.name}!\n')
+                    attack(player, enemy, True)
+                    if enemy.health <= 0:
+                        enemy.health = 0
+                        player_win = True
+                        enemy.isAlive = False
                     print(f'{enemy.name} health: {enemy.health}\n{player.name} health: {player.health}\n')
                     player.turn = False
-                else:
-                    print('No flask in inventory!\n')
-                    print(f'{enemy.name} health: {enemy.health}\n{player.name} health: {player.health}\n')
-            elif choice == '3':
-                os.system('cls')
-                if random.randint(1,10) >= 5:
-                    print(f'You live to see another day thanks to your legs')
-                    break
-                else:
-                    print(f'The {enemy.name} attacks you!\n')
-                    attack(player, enemy, False)
-                    if player.health <= 0:
-                        player.health = 0
-                        player.isAlive = False
-                    print(f'{enemy.name} health: {enemy.health}\n{player.name} health: {player.health}\n')
-                    player.turn = True
-            else:
-                defend = True
-                os.system('cls')
-                print('You choose to defend yourself')
-                player.inventory[1].AC += 5
-                player.turn = False
+
+                case '2':
+                    os.system('cls')
+                    if heal(player):
+                        print('You drink a flask')
+                        print(f'{enemy.name} health: {enemy.health}\n{player.name} health: {player.health}\n')
+                        player.turn = False
+                    else:
+                        print('No flask in inventory!\n')
+                        print(f'{enemy.name} health: {enemy.health}\n{player.name} health: {player.health}\n')
+                
+                case '3':
+                    os.system('cls')
+                    if random.randint(1,10) >= 5:
+                        print(f'You live to see another day thanks to your legs')
+                        break
+                    else:
+                        print(f'The {enemy.name} attacks you!\n')
+                        attack(player, enemy, False)
+                        if player.health <= 0:
+                            player.health = 0
+                            player.isAlive = False
+                        print(f'{enemy.name} health: {enemy.health}\n{player.name} health: {player.health}\n')
+                        player.turn = True
+                
+                case '4':
+                    defend = True
+                    os.system('cls')
+                    print('You choose to defend yourself')
+                    player.inventory[1].AC += 5
+                    player.turn = False
+                    
             time.sleep(2)
         else:
             os.system('cls')
@@ -408,44 +456,8 @@ while (player.isAlive):
                 player.in_town = True
 
         case '5':
-            done = False
-            while done != True:
-                os.system('cls')
-                answer5 = input(f'What do you want to do?\n   1. Equip items\n   2. See item descriptions\n')
-                match answer5:
-                    case '1':
-                        if len(player.inventory) < 4:
-                            print('No available items to equip!')
-                        else:
-                            for i in range(4,len(player.inventory)):
-                                if player.inventory[i].name in weapon:
-                                    choice = input(f'Would you like to equip {player.inventory[i].name}? y or n: ')
-                                    if choice == 'y':
-                                        temp = player.inventory[0]
-                                        player.inventory[0] = player.inventory[i]
-                                        player.inventory[i] = temp
-                                        print('Successfully equipped!')
-                                        done = True
-
-                                if player.inventory[i].name in armor:
-                                    choice = input(f'Would you like to equip {player.inventory[i].name}? y or n: ')
-                                    if choice == 'y':
-                                        temp = player.inventory[1]
-                                        player.inventory[1] = player.inventory[i]
-                                        player.inventory[i] = temp
-                                        print('Successfully equipped!')
-                                        done = True
-                            print('No equippable items found')
-                            done = True
-                    case '2':
-                        choice = input(f'What would you like to view?\n   1. {player.inventory[0].name}\n   2. {player.inventory[1].name}\n   3. {player.inventory[2].name}')
-                        match choice:
-                            case '1':
-                                print(player.inventory[0].description)
-                            case '2':
-                                print(player.inventory[1].description)
-                            case '3':
-                                print(player.inventory[2].description)
+            manage_inventory(player)
+            os.system('cls')
         case '6':
             os.system('cls')
             if player.experience <= player.experience_needed:
