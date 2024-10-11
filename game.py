@@ -168,14 +168,8 @@ def manage_inventory(player):
 
 
 def pick_enemy(level, enemy_list):
-    if level == 0:
-        return enemy_list[random.randint(0,1)]
-    elif level == 1:
-        return enemy_list[random.randint(1,2)]
-    elif level == 2:
-        return enemy_list[random.randint(2,3)]
-    else:
-        return enemy_list[random.randint(3,4)]
+    return enemy_list[level]
+
 
 def attack(player, enemy, isPlayersTurn):
     if isPlayersTurn:
@@ -341,57 +335,104 @@ def heal(player):
         return False
     return True
 
+def boss_battle(player):
+    boss = bosses[area_level]
+    print(f'The {boss.name} appears, ready yourself!')
+    while (boss.isAlive and player.isAlive):
+        if player.turn:
+            choice = input('What is your move?\n\n   1. attack!\n   2. heal\n   3. defend\n')
+            defend = False
+            if choice == '1':
+                os.system('cls')
+                print(f'You attack the {boss.name}!\n')
+                attack(player, boss, True)
+                if boss.health <= 0:
+                    boss.health = 0
+                    boss.isAlive = False
+                print(f'{boss.name} health: {boss.health}\n{player.name} health: {player.health}\n')
+                player.turn = False
+            elif choice == '2':
+                os.system('cls')
+                if heal(player):
+                    print('You drink a flask')
+                    print(f'{boss.name} health: {boss.health}\n{player.name} health: {player.health}\n')
+                    player.turn = False
+                else:
+                    print('No flask in inventory!\n')
+                    print(f'{boss.name} health: {boss.health}\n{player.name} health: {player.health}\n')
+            else:
+                defend = True
+                os.system('cls')
+                print('You choose to defend yourself')
+                player.inventory[1].AC += 5
+                player.turn = False
+            time.sleep(2)
+        else:
+            os.system('cls')
+            print(f'The {boss.name} attacks you!\n')
+            attack(player, boss, False)
+            if player.health <= 0:
+                player.health = 0
+                player.isAlive = False
+            print(f'{boss.name} health: {boss.health}\n{player.name} health: {player.health}\n')
+            player.turn = True
+            if defend:
+                player.inventory[1].AC -= 5
+    if boss.isAlive == False:
+        print(f'You slayed the {boss.name}!')
+        player.gold += boss.gold
+        player.experience += 20
+        player.turn = True
+        area_level += 1
+        started_journey = False
+        
+
 def battle(player):
-    enemy = pick_enemy(player.level, enemies)
+    enemy = pick_enemy(area_level, enemies)
     print(f'A {enemy.name} appears!')
     player_win = False
     while(enemy.isAlive and player.isAlive):
         if player.turn:
             choice = input('What is your move?\n\n1. attack!\n2. heal\n3. run for your life\n4. defend\n')
             defend = False
-            match choice:
-                case '1':
-                    os.system('cls')
-                    print(f'You attack the {enemy.name}!\n')
-                    attack(player, enemy, True)
-                    if enemy.health <= 0:
-                        enemy.health = 0
-                        player_win = True
-                        enemy.isAlive = False
+            if choice == '1':
+                os.system('cls')
+                print(f'You attack the {enemy.name}!\n')
+                attack(player, enemy, True)
+                if enemy.health <= 0:
+                    enemy.health = 0
+                    player_win = True
+                    enemy.isAlive = False
+                print(f'{enemy.name} health: {enemy.health}\n{player.name} health: {player.health}\n')
+                player.turn = False
+            elif choice == '2':
+                os.system('cls')
+                if heal(player):
+                    print('You drink a flask')
                     print(f'{enemy.name} health: {enemy.health}\n{player.name} health: {player.health}\n')
                     player.turn = False
-
-                case '2':
-                    os.system('cls')
-                    if heal(player):
-                        print('You drink a flask')
-                        print(f'{enemy.name} health: {enemy.health}\n{player.name} health: {player.health}\n')
-                        player.turn = False
-                    else:
-                        print('No flask in inventory!\n')
-                        print(f'{enemy.name} health: {enemy.health}\n{player.name} health: {player.health}\n')
-                
-                case '3':
-                    os.system('cls')
-                    if random.randint(1,10) >= 5:
-                        print(f'You live to see another day thanks to your legs')
-                        break
-                    else:
-                        print(f'The {enemy.name} attacks you!\n')
-                        attack(player, enemy, False)
-                        if player.health <= 0:
-                            player.health = 0
-                            player.isAlive = False
-                        print(f'{enemy.name} health: {enemy.health}\n{player.name} health: {player.health}\n')
-                        player.turn = True
-                
-                case '4':
-                    defend = True
-                    os.system('cls')
-                    print('You choose to defend yourself')
-                    player.inventory[1].AC += 5
-                    player.turn = False
-                    
+                else:
+                    print('No flask in inventory!\n')
+                    print(f'{enemy.name} health: {enemy.health}\n{player.name} health: {player.health}\n')
+            elif choice == '3':
+                os.system('cls')
+                if random.randint(1,10) >= 5:
+                    print(f'You live to see another day thanks to your legs')
+                    break
+                else:
+                    print(f'The {enemy.name} attacks you!\n')
+                    attack(player, enemy, False)
+                    if player.health <= 0:
+                        player.health = 0
+                        player.isAlive = False
+                    print(f'{enemy.name} health: {enemy.health}\n{player.name} health: {player.health}\n')
+                    player.turn = True
+            else:
+                defend = True
+                os.system('cls')
+                print('You choose to defend yourself')
+                player.inventory[1].AC += 5
+                player.turn = False
             time.sleep(2)
         else:
             os.system('cls')
@@ -417,70 +458,95 @@ def battle(player):
     enemy.isAlive = True
     player.turn = True
 
-name = input('What is your name, unfortunate soul? ')
+name = input('What is your name? ')
 profession = input('And what is your profession (pick vagabond, warrior, or rogue)? ')
 player = Player(profession, name)
+print(f'Welcome the forgotten land of brimstone! This land was once a place of prosperity and wealth, but is now rubble and ruin.')
+print(f'This land has been overrun by monsters and otherwordly creatures alike. Your mission is to cleanse this place of the enemies that plague it.')
+print(f'You should start laborous journey by killing the Goblin King. You will need to go into his territory and deal with his army along the way.')
+print(f'Each boss you slay will bring you closer to your completing your task and will open each new area to kill the next boss.')
+print(f'You can also head back to town to buy new gear, replenish flasks, and get new quests. Enough chat, you have monsters to slay!')
+area_level = -1
+level_intro = ['You head into a forest ruled by goblins...']
+started_journey = False
 
 while (player.isAlive):
-    print('\nWhat would you like to do?')
-    ans = input('\n   1. Rest\n   2. Fight!\n   3. Show status\n   4. Go to town\n   5. Manage inventory\n   6. Level up\n   7. Shop\n   8. Leave\n')
-    match ans:
-        case '1':
-            os.system('cls')
-            print('You sleep as an escapism from your misery')
-            player.health += player.damage_taken
-            player.damage_taken = 0
-
-        case '2':
-            if player.in_town == False:
+    if started_journey == False:
+        print('\nWhat would you like to do?')
+        ans = input('\n   1. Start journey!\n   2. Show status\n   3. Go to town\n   4. Manage inventory\n   5. Level up\n')
+        match ans:
+            case '1':
                 os.system('cls')
-                battle(player)
+                print(f'{level_intro[area_level]}')
+                area_level += 1
+                started_journey = True
+                enemy_count = 5
+
+            case '2':
+                os.system('cls')
+                print(f'Vigor: {player.vigor} | Strength: {player.strength} | Dexterity: {player.dexterity}')
+                print(f'Health: {player.health} | Enemies slain: {player.enemies_killed} | Flasks: {player.flask_count}\nExperience: {player.experience} | Experience needed: {player.experience_needed}')
+                print(f'Gold: {player.gold}')
+
+            case '3':
+                os.system('cls')
+                if player.in_town:
+                    print('\nAlready in town!')
+                else:
+                    print('You enter the village')
+                    player.in_town = True
+
+            case '4':
+                manage_inventory(player)
+
+            case '5':
+                os.system('cls')
+                if player.experience <= player.experience_needed:
+                    print('No level available!')
+                else:
+                    lvlup(player)
+                    print(f'\nVigor: {player.vigor} | Strength: {player.strength} | Dexterity: {player.dexterity}')
+    else:
+        if enemy_count <= 0:
+            print(f'You finally see the {enemies[area_level].name}!')
+            battle()
+        print('\nWhat would you like to do?')
+        ans = input('\n   1. Rest\n   2. Fight\n   3. Show status\n   4. Go to town\n   5. Manage inventory\n   6. Level up\n')
+        match ans:
+            case '1':
+                os.system('cls')
+                print('You sleep as an escapism from your misery')
+                player.health += player.damage_taken
+                player.damage_taken = 0
+
+            case '2':
+                if player.in_town == False:
+                    os.system('cls')
+                    battle(player)
+                    enemy_count -= 1
                 if player.experience >= player.experience_needed:
                     print('Level up available!')
-            else:
+                else:
+                    os.system('cls')
+                    print('You cannot battle in town!')
+
+            case '3':
                 os.system('cls')
-                print('You cannot battle in town!')
+                if player.in_town:
+                    print('\nAlready in town!')
+                else:
+                    print('You enter the village')
+                    player.in_town = True
 
-        case '3':
-            os.system('cls')
-            print(f'Vigor: {player.vigor} | Strength: {player.strength} | Dexterity: {player.dexterity}')
-            print(f'Health: {player.health} | Enemies slain: {player.enemies_killed} | Flasks: {player.flask_count}\nExperience: {player.experience} | Experience needed: {player.experience_needed}')
-            print(f'Gold: {player.gold}')
+            case '4':
+                manage_inventory(player)
 
-        case '4':
-            os.system('cls')
-            if player.in_town:
-                print('\nAlready in town!')
-            else:
-                print('You enter the village')
-                player.in_town = True
-
-        case '5':
-            manage_inventory(player)
-            os.system('cls')
-        case '6':
-            os.system('cls')
-            if player.experience <= player.experience_needed:
-                print('No level available!')
-            else:
-                lvlup(player)
-                print(f'\nVigor: {player.vigor} | Strength: {player.strength} | Dexterity: {player.dexterity}')
-        case '7':
-            os.system('cls')
-            if player.in_town:
-                shop(player)
-            else:
-                print('You must be town to shop!')
-        case '8':
-            os.system('cls')
-            if player.in_town:
-                print('You leave town')
-                player.in_town = False
-                os.sysetem('cls')
-            else:
+            case '5':
                 os.system('cls')
-                choice = input('Are you sure you want to quit? y or n: ')
-                if choice == 'y':
-                    break
-                    
+                if player.experience <= player.experience_needed:
+                    print('No level available!')
+                else:
+                    lvlup(player)
+                    print(f'\nVigor: {player.vigor} | Strength: {player.strength} | Dexterity: {player.dexterity}')
+
 print('Game over')
